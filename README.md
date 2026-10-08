@@ -8,7 +8,7 @@ Batangas State University, Alangilan Campus
 
 | Name | Student Number | Section |
 |---|---|---|
-| Antenor, Marc Andrei M. | | MExE-4102 |
+| Antenor, Marc Andrei M. | 23-05844 | MExE-4102 |
 | Fornal, Ian Avenick G. | | MExE-4102 |
 
 ## Notebook links
