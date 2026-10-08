@@ -30,111 +30,184 @@ you and what surprised you. Not what the library does, but what you understood.
 
 ## Errors we found
 
-# Chapter 1, 2, & 3
+## Chapter 1, 2, & 3
 
-An analysis of the code in your notebook reveals several code warnings, logical and methodological contradictions, redundancies, and structural sequence errors across Chapters1, 2 and 3.
+### 1. Year and Publisher Imputation
 
-## 1. Syntax & Warning Errors
+Using `inplace=True` for chained operations may cause problems in **pandas 3.0**. It is recommended to assign the result directly back to the column.
 
-### Deprecated Inplace Chained Assignment (`FutureWarning`)
+**Recommended fix:**
 
-* **Location:** Chapter 3, Step 3 (Handle Missing Values)
-* **Code:**
+```python
+df['Year'] = df['Year'].fillna(df['Year'].median()).astype(int)
+df['Publisher'] = df['Publisher'].fillna('Unknown')
+```
 
-  Python
+This approach is clearer and avoids potential issues with chained assignments.
 
-  ```
-  df['Year'].fillna(df['Year'].mean(), inplace=True)
-  df['Publisher'].fillna(df['Publisher'].mode()[0], inplace=True)
+---
 
-  ```
-* **Issue:** Pandas 2.0+ deprecates `inplace=True` when called on single-column indexing (`df['col']`). Because `df['col']` creates an intermediate Series object, setting values in-place throws a `FutureWarning`.
-* **Fix:** Use direct reassignment or dictionary-based `fillna`:
+### 2. Mean Imputation for Year
 
-  Python
+Using the mean to fill missing years can produce a value such as:
 
-  ```
-  df['Year'] = df['Year'].fillna(df['Year'].median())
-  df['Publisher'] = df['Publisher'].fillna(df['Publisher'].mode()[0])
+```text
+2006.406443
+```
 
-  ```
+This is not a valid year and does not represent an actual release year.
 
-## 2. Logical & Methodological Errors
+The **median** is more appropriate because it produces a value closer to an actual year. Converting the result to an integer also ensures that the column contains whole years.
 
-### Contradictory Strategy: Imputation Followed by Deletion
+```python
+df['Year'] = df['Year'].fillna(df['Year'].median()).astype(int)
+```
 
-* **Location:** Chapter 3, Step 3 (Handle Missing Values)
-* **Code:**
+Another possible approach is to determine the year from the game title when the information is available, although this should only be done when the year can be identified reliably.
 
-  Python
+---
 
-  ```
-  # Imputation
-  df['Publisher'].fillna(df['Publisher'].mode()[0], inplace=True)
+### 3. Publisher Mode Imputation
 
-  # Deletion
-  df = df[df['Publisher'].notna()]
+Using the most common publisher, such as **Electronic Arts**, to replace every missing publisher can introduce incorrect information into the dataset.
 
-  ```
-* **Issue:** Line 1 replaces all 58 missing `Publisher` values with `"Nintendo"`. Line 2 then filters the dataframe for non-null `Publisher` values. Because Line 1 removed all missing values, Line 2 finds 0 null rows and does nothing.
-* **Fix:** Choose **either** Imputation or Deletion, not both on the same column.
+Instead, missing publisher values should be explicitly labeled as:
 
-### Imputing Non-Discrete Float Mean for `Year`
+```python
+df['Publisher'] = df['Publisher'].fillna('Unknown')
+```
 
-* **Location:** Chapter 3, Step 3
-* **Code:** `df['Year'].fillna(df['Year'].mean(), inplace=True)`
-* **Issue:** `df['Year'].mean()` calculates to `2006.4064...`. Filling missing years with a float creates unnatural release dates.
-* **Fix:** Use `df['Year'].median()` or `df['Year'].mode()[0]`, and cast the column to an integer type (`Int64`).
+This preserves the fact that the original publisher information was unavailable rather than assigning a potentially incorrect publisher.
 
-### Arbitrary Outlier Removal (`Global_Sales <= 40`)
+---
 
-* **Location:** Chapter 3 (Noisy Data)
-* **Code:** `df = df[df['Global_Sales'] <= 40]`
-* **Issue:** Games with sales above 40M (e.g., *Wii Sports* at 82.74M or *Super Mario Bros.* at 40.24M) are legitimate top-selling historical records, not data entry noise or human errors. Filtering them truncates real extreme values rather than cleaning noisy data.
+### 4. Deletion Step
 
-## 3. Code Redundancies
+The deletion step may not remove any rows if missing publisher values have already been replaced with `"Unknown"`.
 
-### Unused Library Import
+If deletion of missing publisher records is required, use:
 
-* **Location:** Chapter 3, Step 1
-* **Code:** `import numpy as np`
-* **Issue:** The text states *"In this case, we require numpy"*, but no NumPy functions are used throughout the entire dataset cleaning process.
+```python
+df = df.dropna(subset=['Publisher'])
+```
 
-### Duplicate Dataset Loading
+However, if the preprocessing strategy is to retain the rows and label missing publishers as `"Unknown"`, the deletion step is unnecessary and can be removed.
 
-* **Location:** Chapter 2, Step 3 & Step 4
-* **Code:** `df = pd.read_csv('/content/vgsales.csv')` is executed twice back-to-back before running `df.dtypes`.
+---
 
-### Ineffective Duplicate Removal
+### 5. Duplicate Checking
 
-* **Location:** Chapter 3, Step 6
-* **Code:**
+Checking duplicates using only `Rank` is not very useful because `Rank` is unique for each record.
 
-  Python
+Instead, check the columns that describe and identify a game:
 
-  ```
-  print(df.duplicated().sum()) # Output: 0
-  df = df.drop_duplicates()
-  print(df.duplicated().sum()) # Output: 0
+```python
+cols = ['Name', 'Platform', 'Year', 'Genre', 'Publisher']
 
-  ```
-* **Issue:** `df.duplicated().sum()` was already `0`. Calling `df.drop_duplicates()` executes a full row scan without making any changes.
+print(df.duplicated(subset=cols).sum())
 
-## 4. Sequence & Structural Errors
+df = df.drop_duplicates(subset=cols)
+```
 
-### Out-of-Order Execution Steps
+This helps identify records that may represent the same game even when their `Rank` values are different.
 
-* **Location:** Chapter 3
-* **Issue:** **Step 4: Validate Your Results** appears *after* **Step 5: Confirm Your Results** and **Step 6: Eliminate Redundancies**.
-* **Fix:** Reorder the markdown headers and code blocks sequentially:
+After removing rows, reset the index:
 
-  1. Step 1: Import Libraries (`pandas`)
-  2. Step 2: Locate Missing Values
-  3. Step 3: Handle Missing & Duplicate Data
-  4. Step 4: Drop Irrelevant Features
-  5. Step 5: Validate & Confirm Cleaned Data
+```python
+df = df.reset_index(drop=True)
+```
 
+---
 
+### 6. Outlier Removal
+
+Automatically removing games with sales greater than **40 million** is not recommended.
+
+Some games naturally have extremely high sales. For example:
+
+* Wii Sports
+* Super Mario Bros.
+
+These are legitimate observations and should not be removed simply because their sales are unusually high.
+
+If outlier detection is required, an **Interquartile Range (IQR)** method can be considered:
+
+```python
+Q1 = df['Global_Sales'].quantile(0.25)
+Q3 = df['Global_Sales'].quantile(0.75)
+
+IQR = Q3 - Q1
+
+lower_bound = Q1 - 1.5 * IQR
+upper_bound = Q3 + 1.5 * IQR
+
+outliers = df[
+    (df['Global_Sales'] < lower_bound) |
+    (df['Global_Sales'] > upper_bound)
+]
+
+print(outliers)
+```
+
+However, statistical outliers should be **examined before removal**. A high sales value does not necessarily mean that the data is incorrect.
+
+---
+
+### 7. Invalid or Unexpected Years
+
+The dataset contains some years greater than **2016**, including values such as 2017 and 2020.
+
+Since the dataset appears to have been collected around 2016, these records should be investigated before deciding whether they are valid or erroneous.
+
+Use:
+
+```python
+df[df['Year'] > 2016]
+```
+
+The records should be reviewed instead of automatically deleting them.
+
+---
+
+### 8. `df.info()` Usage
+
+Using:
+
+```python
+print(df.info())
+```
+
+is unnecessary because `df.info()` already prints the DataFrame information.
+
+Use:
+
+```python
+df.info()
+```
+
+---
+
+### 9. Unused NumPy Import
+
+If NumPy is imported but not used anywhere in the notebook:
+
+```python
+import numpy as np
+```
+
+the import should be removed to keep the code clean.
+
+---
+
+### 10. Resetting the Index
+
+After deleting rows or duplicate records, reset the DataFrame index:
+
+```python
+df = df.reset_index(drop=True)
+```
+
+This ensures that the index remains sequential after preprocessing.
 ## Note on AI tools
 
 Say whether you used an AI tool, and what for. This is not a penalty.
