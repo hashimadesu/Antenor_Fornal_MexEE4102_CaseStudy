@@ -611,4 +611,4 @@ X_test_transformed = preprocessor.transform(X_test)
 
 The training data is used to learn the values needed for imputation and scaling. The same preprocessing steps are then applied to the test data without fitting the pipeline again. This helps prevent data leakage and provides a more reliable evaluation when training and testing a machine learning model.
 
-<*Note:* The second issue becomes a real problem if the preprocessed data is used for model evaluation without a proper train-test split. The first issue is a mismatch between the notebook's stated goal of using the other features and its actual selection of only Age and Fare.>
+>**Note:** The second issue becomes a real problem if the preprocessed data is used for model evaluation without a proper train-test split. The first issue is a mismatch between the notebook's stated goal of using the other features and its actual selection of only Age and Fare.
