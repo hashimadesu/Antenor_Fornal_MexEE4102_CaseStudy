@@ -627,7 +627,7 @@ selector.fit(
 )
 ```
 Using three folds and a different scoring metric avoids the specific R² warning caused by test folds containing fewer than two samples, provided each test fold has enough samples for the chosen metric. However, a larger dataset is still recommended for more reliable feature selection.
----
+
 # Chapter 8: Errors We Found
 
 ### 1. The Preprocessing Pipeline Only Processes Age and Fare
