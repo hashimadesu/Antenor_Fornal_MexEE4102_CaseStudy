@@ -552,5 +552,63 @@ preprocessor = ColumnTransformer(transformers=[
 ])
 
 X_transformed = preprocessor.fit_transform(X)
+```
+*Correct version:*
 
+If the goal is to include more useful features, the preprocessing pipeline should handle both numerical and categorical columns.
+```python
+from sklearn.pipeline import Pipeline
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.impute import SimpleImputer
 
+numeric_features = ['Age', 'Fare', 'Pclass', 'SibSp', 'Parch']
+categorical_features = ['Sex', 'Embarked']
+
+numeric_pipeline = Pipeline(steps=[
+    ('imputation', SimpleImputer(strategy='mean')),
+    ('scaling', StandardScaler())
+])
+
+categorical_pipeline = Pipeline(steps=[
+    ('imputation', SimpleImputer(strategy='most_frequent')),
+    ('encoding', OneHotEncoder(handle_unknown='ignore'))
+])
+
+preprocessor = ColumnTransformer(transformers=[
+    ('numeric', numeric_pipeline, numeric_features),
+    ('categorical', categorical_pipeline, categorical_features)
+])
+
+X_transformed = preprocessor.fit_transform(X)
+```
+*Explanation:*
+
+The corrected version processes numerical and categorical features separately. Numerical columns are filled in when values are missing and then scaled, while categorical columns are filled in using the most frequent value and converted into numerical form through one-hot encoding. This allows the model to use more of the available information instead of processing only Age and Fare.
+
+### 2. The Dataset Is Preprocessed Without Splitting the Training and Testing Data
+
+The notebook applies fit_transform(X) to the entire feature dataset. If this transformed data is later used to evaluate a machine learning model, information from the test set could influence preprocessing, particularly the imputation and scaling steps.
+
+*Original code:*
+```python
+X_transformed = preprocessor.fit_transform(X)
+
+*Correct version:*
+
+Split the data first, then fit the preprocessing pipeline using only the training data.
+
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+X_train_transformed = preprocessor.fit_transform(X_train)
+X_test_transformed = preprocessor.transform(X_test)
+```
+*Explanation:*
+
+The training data is used to learn the values needed for imputation and scaling. The same preprocessing steps are then applied to the test data without fitting the pipeline again. This helps prevent data leakage and provides a more reliable evaluation when training and testing a machine learning model.
+
+<*Note:* The second issue becomes a real problem if the preprocessed data is used for model evaluation without a proper train-test split. The first issue is a mismatch between the notebook's stated goal of using the other features and its actual selection of only Age and Fare.>
