@@ -9,19 +9,19 @@ Batangas State University, Alangilan Campus
 | Name | Student Number | Section |
 |---|---|---|
 | Antenor, Marc Andrei M. | 23-05844 | MExE-4102 |
-| Fornal, Ian Avenick G. | | MExE-4102 |
+| Fornal, Ian Avenick G. | 23-00685 | MExE-4102 |
 
 ## Notebook links
 
-| Chapter | Member 1 | Member 2 |
-|---|---|---|
-| Ch1_2_3 | [link]() | [link]() |
-| Ch4 | [link]() | [link]() |
-| Ch5 | [link]() | [link]() |
-| Ch6 | [link]() | [link]() |
-| Ch7 | [link]() | [link]() |
-| Ch8 | [link]() | [link]() |
-| Ch9 | [link]() | [link]() |
+| Chapter | Link |
+|---|---|
+| Ch1_2_3 | [link](https://colab.research.google.com/drive/1zdErlyujjKPfCoMHggEfZFBUMNYVTrWJ?usp=drive_link) | 
+| Ch4 | [link](https://colab.research.google.com/drive/18ALsvNNsFaVdY-sHdoRiuIj3hEbZ6MDJ?usp=drive_link) | 
+| Ch5 | [link](https://colab.research.google.com/drive/10ZmlHpBdbtRSQQvDAf4fATDsmpgC-T0C?usp=drive_link) | 
+| Ch6 | [link](https://colab.research.google.com/drive/1GBKPZXiJfKxF2q_boRC5itZhP8p9MH0K?usp=drive_link) | 
+| Ch7 | [link](https://colab.research.google.com/drive/1whQoQErli4tBUYfTrfvqGXTa2zlullMK?usp=drive_link) | 
+| Ch8 | [link](https://colab.research.google.com/drive/1H6PNqrm9wBKy2F2HsESJcunuFEAJuowj?usp=drive_link) | 
+| Ch9 | [link](https://colab.research.google.com/drive/1RqR3TilkZkQFmn3fTBioVSHsQoZGA0hK?usp=drive_link) | 
 
 ## What we learned
 
