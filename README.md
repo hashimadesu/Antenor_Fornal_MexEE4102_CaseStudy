@@ -339,6 +339,202 @@ The important point is that the encoding method and its explanation should match
 
 ---
 
+## Chapter 5
+
+### 1. The Normalization Cell Is Empty
+
+The notebook imports `MinMaxScaler` but does not use it in the normalization cell. As a result, the normalization step is not performed.
+
+**Recommended fix:**
+
+```python
+mm_scaler = MinMaxScaler()
+
+normalized_data = mm_scaler.fit_transform(df_2)
+
+df_normalized = pd.DataFrame(
+    normalized_data,
+    columns=df_2.columns
+)
+
+print(df_normalized)
+```
+
+This applies Min-Max scaling, transforming each feature to a range between 0 and 1, provided the feature has a nonzero range.
+
+### 2. The Scaled Data Has No Column Names
+
+`StandardScaler` returns a NumPy array, which does not preserve the original DataFrame's column names.
+
+Convert the scaled output back into a DataFrame:
+
+```python
+scaled_df = pd.DataFrame(
+    scaled_data,
+    columns=df.columns
+)
+
+print(scaled_df)
+```
+
+This makes the scaled data easier to read and allows the original column names to be retained.
+
+### 3. Standard Deviation Gives a Different Result
+
+`StandardScaler` uses the population standard deviation, while pandas uses the sample standard deviation by default.
+
+To verify the scaled data consistently, use:
+
+```python
+print(scaled_df.std(ddof=0))
+```
+
+The parameter `ddof=0` calculates the population standard deviation. For a nonconstant feature scaled with `StandardScaler`, the resulting standard deviation should be approximately 1, subject to floating-point precision.
+
+### 4. The Dataset Is Copied Unnecessarily
+
+The DataFrame `df_2` contains the same data as `df`. Creating another copy is unnecessary if no changes to the dataset are required.
+
+Use the existing DataFrame when possible, and place the `MinMaxScaler` import in the main import section:
+
+```python
+import pandas as pd
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
+```
+
+This keeps the code organized and avoids redundant data preparation.
+
+If `df_2` was intentionally created to preserve a separate version of the dataset, retaining it may still be appropriate.
+
+### 5. The `head()` Function Hides Some Rows
+
+The `head()` method displays only the first five rows by default. Since the dataset contains only seven rows, some observations are not shown.
+
+To display the entire dataset, use:
+
+```python
+print(df)
+```
+
+Alternatively, `df.head(7)` can be used to display all seven rows.
+
+---
+
+## Conceptual Issues
+
+### 6. The Scaling Explanation Is Unclear
+
+Standardization and Min-Max scaling are different preprocessing techniques.
+
+* **Standardization:** Transforms values so that each nonconstant feature has a mean of approximately 0 and a population standard deviation of approximately 1.
+* **Min-Max scaling:** Transforms values so that the minimum becomes 0 and the maximum becomes 1.
+
+The notebook's explanation should clearly distinguish these methods instead of describing them as if they perform the same operation.
+
+### 7. The Stated Data Ranges Are Incorrect
+
+The markdown description states that Study Hours range from 0 to 20 and Grades range from 0 to 100. However, the actual dataset has the following ranges:
+
+| Feature     | Actual Minimum | Actual Maximum |
+| ----------- | -------------: | -------------: |
+| Study Hours |              8 |             15 |
+| Grades      |             76 |             92 |
+
+Update the markdown explanation to reflect the actual dataset.
+
+The values above describe the original data, not the scaled output. After Min-Max scaling, each nonconstant feature will have a minimum of 0 and a maximum of 1 when fitted and transformed on the same dataset.
+
+### 8. Scaling the Entire Dataset Can Cause Data Leakage
+
+In a real machine learning project, fitting a scaler on the entire dataset before splitting it into training and testing sets can introduce data leakage.
+
+The scaler should be fitted using only the training data. The same fitted scaler is then used to transform the test data.
+
+**Recommended approach:**
+
+```python
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
+X = df[['Study Hours']]
+y = df['Grades']
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42
+)
+
+scaler = StandardScaler()
+
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+```
+
+This ensures that the test data does not influence the scaling parameters used during training.
+
+### 9. Scaling the Target Column
+
+If `Grades` is the value the model is supposed to predict, it should be treated as the **target variable**, not as an input feature.
+
+Normally, scaling is applied to the input features. The target is left unchanged unless target scaling is specifically needed for the chosen model or training process.
+
+For example:
+
+```python
+X = df[['Study Hours']]
+y = df['Grades']
+```
+
+Here, `Study Hours` is the input feature, while `Grades` is the target.
+
+If target scaling is necessary, it should be handled separately to ensure predictions can be converted back to the original grade scale.
+
+---
+
+## Recommended Code for the Scaling Demonstration
+
+For a simple classroom demonstration using the existing dataset:
+
+```python
+import pandas as pd
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
+
+# Display the complete dataset
+print(df)
+
+# Standardization
+std_scaler = StandardScaler()
+scaled_data = std_scaler.fit_transform(df)
+
+scaled_df = pd.DataFrame(
+    scaled_data,
+    columns=df.columns
+)
+
+print("Standardized Data:")
+print(scaled_df)
+
+# Verify the population standard deviation
+print("Population Standard Deviation:")
+print(scaled_df.std(ddof=0))
+
+# Min-Max normalization
+mm_scaler = MinMaxScaler()
+normalized_data = mm_scaler.fit_transform(df)
+
+df_normalized = pd.DataFrame(
+    normalized_data,
+    columns=df.columns
+)
+
+print("Min-Max Scaled Data:")
+print(df_normalized)
+```
+
+---
+
 ## Note on AI tools
 
 Say whether you used an AI tool, and what for. This is not a penalty.
