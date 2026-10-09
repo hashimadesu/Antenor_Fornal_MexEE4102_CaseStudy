@@ -612,3 +612,137 @@ X_test_transformed = preprocessor.transform(X_test)
 The training data is used to learn the values needed for imputation and scaling. The same preprocessing steps are then applied to the test data without fitting the pipeline again. This helps prevent data leakage and provides a more reliable evaluation when training and testing a machine learning model.
 
 >**Note:** The second issue becomes a real problem if the preprocessed data is used for model evaluation without a proper train-test split. The first issue is a mismatch between the notebook's stated goal of using the other features and its actual selection of only Age and Fare.
+
+# Chapter 9: Errors We Found 
+
+### 1. The “Before Discretization” Graph Uses Data That Has Already Been Discretized
+
+The notebook changes the Age column into categories (Child, Adult, and Elderly) before creating the graph labeled “Before discretization.” Because the original age values have already been replaced, the graph does not show the actual age distribution before discretization.
+
+*Original code:*
+```python
+# Data Discretization
+bins = [0, 12, 50, 200]
+labels = ['Child', 'Adult', 'Elderly']
+data['Age'] = pd.cut(data['Age'], bins=bins, labels=labels)
+```
+Later, the notebook uses:
+```python
+# Before discretization
+plt.hist(data['Age'].dropna(),
+         alpha=0.5,
+         label='Before discretization')
+```
+*Correct version:*
+
+Keep the original age values and create a separate column for the age categories.
+```python
+# Save the original age values
+data['Age_Original'] = data['Age'].copy()
+
+# Create age categories in a separate column
+bins = [0, 12, 50, 200]
+labels = ['Child', 'Adult', 'Elderly']
+
+data['Age_Group'] = pd.cut(
+    data['Age_Original'],
+    bins=bins,
+    labels=labels
+)
+
+# Before discretization
+plt.hist(data['Age_Original'].dropna(), bins=30)
+plt.title('Age Distribution Before Discretization')
+plt.xlabel('Age')
+plt.ylabel('Count')
+plt.show()
+```
+*Explanation:*
+
+The original age values should be preserved so they can be used to display the distribution before discretization. Creating a separate Age_Group column allows us to compare the original data with the categorized data without losing the original values.
+
+### 2. The “After Discretization” Graph Uses the Wrong Column
+
+The notebook uses titanic_preprocessed[:,2] to create the graph labeled “After discretization.” However, the preprocessing pipeline places Age and Fare first, followed by the encoded categorical features. Therefore, column index 2 represents the first encoded categorical feature, not the discretized age.
+
+*Original code:*
+```python
+# After discretization
+plt.hist(
+    titanic_preprocessed[:,2],
+    alpha=0.5,
+    label='After discretization'
+)
+plt.legend()
+plt.show()
+```
+*Correct version:*
+
+Use the new Age_Group column to display the number of passengers in each age category.
+```python
+# After discretization
+data['Age_Group'].value_counts().reindex(
+    ['Child', 'Adult', 'Elderly']
+).plot(kind='bar')
+
+plt.title('Age Distribution After Discretization')
+plt.xlabel('Age Group')
+plt.ylabel('Count')
+plt.show()
+```
+*Explanation:*
+
+The original code plots an encoded categorical feature instead of the age categories. The corrected version displays the actual number of passengers classified as children, adults, and elderly people. This makes the graph consistent with the purpose of age discretization.
+
+### 3. The Preprocessed Data Is Created Before Age Discretization
+
+The notebook applies the preprocessing pipeline using data before changing the Age column into categories. This means the resulting titanic_preprocessed array still contains the scaled numerical age values rather than the newly created age categories.
+
+*Original code:*
+```python
+# Fit and transform the data
+titanic_preprocessed = preprocessor.fit_transform(data)
+
+# Data Discretization
+bins = [0, 12, 50, 200]
+labels = ['Child', 'Adult', 'Elderly']
+
+data['Age'] = pd.cut(
+    data['Age'],
+    bins=bins,
+    labels=labels
+)
+```
+*Correct version:*
+
+If the intention is to include age categories in the preprocessing pipeline, create the categories before fitting the pipeline and update the feature definitions accordingly.
+```python
+# Create age categories first
+bins = [0, 12, 50, 200]
+labels = ['Child', 'Adult', 'Elderly']
+
+data['Age_Group'] = pd.cut(
+    data['Age'],
+    bins=bins,
+    labels=labels
+)
+
+# Define the features to be processed
+numeric_features = ['Fare']
+categorical_features = [
+    'Age_Group',
+    'Embarked',
+    'Sex',
+    'Pclass'
+]
+
+# Apply preprocessing after defining the updated features
+X = data[numeric_features + categorical_features]
+
+titanic_preprocessed = preprocessor.fit_transform(X)
+```
+*Explanation:*
+
+The preprocessing pipeline should be configured to match the features being used. If age is represented by categories, the pipeline must process Age_Group as a categorical feature rather than continuing to use the original numerical Age column.
+
+>**Note:** The first two issues are the clearest problems visible in the notebook. The third is a mismatch between the order of preprocessing and the intended use of age categories; it is an actual error only if the goal is to use those categories in the transformed dataset.
