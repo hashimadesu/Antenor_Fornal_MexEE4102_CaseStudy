@@ -746,3 +746,14 @@ titanic_preprocessed = preprocessor.fit_transform(X)
 The preprocessing pipeline should be configured to match the features being used. If age is represented by categories, the pipeline must process Age_Group as a categorical feature rather than continuing to use the original numerical Age column.
 
 >**Note:** The first two issues are the clearest problems visible in the notebook. The third is a mismatch between the order of preprocessing and the intended use of age categories; it is an actual error only if the goal is to use those categories in the transformed dataset.
+
+## Note on AI Tools
+## To maximize efficiency, specific AI tools were strategically selected based on their core strengths:
+
+*Claude AI*: Primarily utilized for deep code analysis, root-cause error diagnosis, and answering technical chapter questions. Claude’s advanced reasoning capabilities made it the ideal tool for debugging complex logic and explaining technical concepts.
+
+*ChatGPT (OpenAI)*: Employed for project organization and documentation. ChatGPT generated structured Markdown code to create a well-formatted GitHub README.md file and setup guide.
+
+*Google Gemini*: Used to distill and simplify dense explanations provided by Claude AI into concise takeaways. Furthermore, Gemini’s native multimodal capabilities were leveraged to analyze visual code screenshots directly, helping spot syntax and visual errors in the IDE.
+
+## Reference
