@@ -546,7 +546,6 @@ print(df_normalized)
 The notebook states that the Titanic dataset will use the other columns as features to predict the Survived column. However, the ColumnTransformer only selects Age and Fare. By default, ColumnTransformer drops the other columns that are not selected, so features such as Sex, Pclass, and Embarked are not included in the transformed output.
 
 *Original code:*
-
 ```python
 preprocessor = ColumnTransformer(transformers=[
     ('age_fare', pipeline, ['Age', 'Fare'])
@@ -554,15 +553,4 @@ preprocessor = ColumnTransformer(transformers=[
 
 X_transformed = preprocessor.fit_transform(X)
 
-
-## Note on AI tools
-
-Say whether you used an AI tool, and what for. This is not a penalty.
-Hiding it is.
-
-## References
-
-McKinney, W. (2021). Python for Data Analysis, 3rd ed. O'Reilly.
-VanderPlas, J. Python Data Science Handbook.
-Any other page or article you used.
 
