@@ -27,8 +27,6 @@ Batangas State University, Alangilan Campus
 
 ### Chapter 1_2_3: What We Learned 
 
-# Data Preprocessing: Chapters 1–3
-
 Data preprocessing is an essential part of data science because raw datasets often contain missing values, inconsistent formats, and irrelevant features. Chapter 1 introduces the importance of cleaning data before applying machine learning techniques. It covers three main processes: handling missing values through imputation or deletion, transforming data into consistent formats, and selecting relevant features while removing unnecessary columns. Proper preprocessing improves data quality, supports model accuracy, and reduces unnecessary computational costs. This highlights the importance of providing clean and reliable data before building a machine learning model.
 
 Chapter 2 focuses on loading and inspecting datasets using pandas, including common file formats such as CSV, JSON, and Excel. Using the Kaggle video game sales dataset as an example, it demonstrates how `pd.read_csv()` loads data into a DataFrame and how variables can be classified as numeric, categorical, or datetime types. Functions such as `df.dtypes`, `df.head()`, `df.describe()`, and `df.info()` help examine the dataset's structure, statistical summaries, missing values, and memory usage. For example, identifying that the Year column contains 16,327 non-null values out of 16,598 rows helps determine the extent of missing data before beginning the cleaning process.
