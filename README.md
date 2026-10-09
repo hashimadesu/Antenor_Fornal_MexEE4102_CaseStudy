@@ -539,6 +539,21 @@ print(df_normalized)
 ```
 
 ---
+# Chapter 8: Errors We Found
+
+### 1. The Preprocessing Pipeline Only Processes Age and Fare
+
+The notebook states that the Titanic dataset will use the other columns as features to predict the Survived column. However, the ColumnTransformer only selects Age and Fare. By default, ColumnTransformer drops the other columns that are not selected, so features such as Sex, Pclass, and Embarked are not included in the transformed output.
+
+*Original code:*
+
+```python
+preprocessor = ColumnTransformer(transformers=[
+    ('age_fare', pipeline, ['Age', 'Fare'])
+])
+
+X_transformed = preprocessor.fit_transform(X)
+
 
 ## Note on AI tools
 
