@@ -537,7 +537,96 @@ df_normalized = pd.DataFrame(
 print("Min-Max Scaled Data:")
 print(df_normalized)
 ```
+# Chapter 6: Errors We Found
 
+### 1. The Z-Score Method Does Not Detect 100 as an Outlier
+
+The current code uses the Z-score method to identify outliers by checking if the absolute Z-score is greater than 3. However, the output shows an empty list even though the value 100 is much higher than the other values in the dataset. This happens because the Z-score of 100 is approximately 2.62, which does not exceed the threshold of 3.
+
+A possible improvement is to use a lower threshold, such as 2.5, if it is appropriate for the dataset:
+```python
+outliers = data[np.abs(z_scores) > 2.5]
+print("Outliers:", outliers)
+```
+This identifies 100 as an outlier in the example. However, the threshold should be chosen carefully because lowering it may also classify other values as outliers.
+
+### 2. The Z-Score and IQR Methods Produce Different Results
+
+The chapter states that 100 is a clear outlier, but the Z-score method does not detect it. In contrast, the IQR method successfully identifies 100 as an outlier using the lower and upper boundaries. This happens because the two methods use different approaches to identify unusual values.
+
+A better approach is to show the results of both methods and explain why they differ:
+```python
+# Z-score method
+z_scores = stats.zscore(data)
+z_outliers = data[np.abs(z_scores) > 3]
+
+print("Z-score outliers:", z_outliers)
+
+# IQR method
+Q1 = data.quantile(0.25)
+Q3 = data.quantile(0.75)
+IQR = Q3 - Q1
+
+iqr_outliers = data[
+    (data < Q1 - 1.5 * IQR) |
+    (data > Q3 + 1.5 * IQR)
+]
+
+print("IQR outliers:", iqr_outliers)
+```
+The expected result is that the Z-score method returns an empty result, while the IQR method identifies 100. The explanation should clarify that the methods can produce different results and that an outlier should not automatically be removed without checking the data.
+
+# Chapter 7: Errors We Found
+### 1. The Filter Method Includes the Target Variable as a Selected Feature
+
+The current code calculates the correlation of each feature with final grade and selects the features with a correlation greater than 0.5.
+```python
+correlations = df_2.corr()['final grade'].sort_values()
+
+relevant_features = correlations[correlations > 0.5]
+
+print(relevant_features)
+```
+However, the output also includes final grade itself because its correlation with itself is always 1.0. The target variable should not be included in the selected input features because it is the value the model is supposed to predict.
+
+A better approach is to remove the target variable before selecting the relevant features:
+```python
+correlations = df_2.corr()['final grade'].drop('final grade')
+
+relevant_features = correlations[correlations > 0.5]
+
+print(relevant_features)
+```
+This selects only the features that have a correlation greater than 0.5 with final grade, without including the target variable itself.
+
+### 2. The Wrapper Method Produces Undefined R² Warnings
+
+The current code uses RFECV with a Support Vector Regression model and five-fold cross-validation.
+```python
+selector = RFECV(estimator, step=1, cv=5)
+
+selector = selector.fit(
+    df_2.drop('final grade', axis=1),
+    df_2['final grade']
+)
+```
+However, the output shows repeated warnings stating that R² is not well-defined with fewer than two samples. This happens because the dataset contains only a small number of rows, and five-fold cross-validation can leave some test folds with only one sample. As a result, the model cannot calculate R² properly for those folds.
+
+A better approach is to use a larger dataset with enough samples for cross-validation. If the small dataset must be used for demonstration, the number of folds can be reduced:
+```python
+selector = RFECV(
+    estimator=estimator,
+    step=1,
+    cv=3,
+    scoring='neg_mean_squared_error'
+)
+
+selector.fit(
+    df_2.drop('final grade', axis=1),
+    df_2['final grade']
+)
+```
+Using three folds and a different scoring metric avoids the specific R² warning caused by test folds containing fewer than two samples, provided each test fold has enough samples for the chosen metric. However, a larger dataset is still recommended for more reliable feature selection.
 ---
 # Chapter 8: Errors We Found
 
