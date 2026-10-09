@@ -35,7 +35,7 @@ Chapter 3 discusses data cleaning techniques for identifying and handling missin
 
 ### Chapter 4: What We Learned
 
-In Chapter 4, I learned that feature engineering helps improve data before using it in machine learning. I understood that we can create new features from existing data, combine values, group data into categories, and convert text data into numbers that computers can understand. What surprised me was that even simple changes to the data can make a big difference in the results of a machine learning model. This chapter helped me realize that preparing good features is just as important as choosing the right algorithm because the quality of the data affects the quality of the output.
+Chapter 4, I learned that feature engineering helps improve data before using it in machine learning. I understood that we can create new features from existing data, combine values, group data into categories, and convert text data into numbers that computers can understand. What surprised me was that even simple changes to the data can make a big difference in the results of a machine learning model. This chapter helped me realize that preparing good features is just as important as choosing the right algorithm because the quality of the data affects the quality of the output.
 
 ### Chapter 5: What We Learned 
 
@@ -50,7 +50,7 @@ In Chapter 5, I learned that data should be prepared properly before using it in
 
 ### Chapter 8: What We Learned 
 
-n Chapter 8, I learned that preparing data can be made easier by using a preprocessing pipeline. I understood that instead of doing every step manually, different processes can be connected and done in the correct order. What surprised me was how a pipeline can help avoid mistakes and save time, especially when working with large datasets. This chapter made me realize that being organized in data preprocessing is important because it makes the whole machine learning process more efficient and easier to manage.
+Chapter 8, I learned that preparing data can be made easier by using a preprocessing pipeline. I understood that instead of doing every step manually, different processes can be connected and done in the correct order. What surprised me was how a pipeline can help avoid mistakes and save time, especially when working with large datasets. This chapter made me realize that being organized in data preprocessing is important because it makes the whole machine learning process more efficient and easier to manage.
 
 ### Chapter 9: What We Learned 
 
